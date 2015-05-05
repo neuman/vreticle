@@ -1,6 +1,12 @@
 # vreticle
 A gaze directed interface for THREE.js with an event handling system, live demo available here: http://neuman.github.io/vreticle/ . 
 
+This package is intended for use in webvr powered games and applications. Webvr is an upcoming standard for the delivery of virtual reality experiences through the web. However, while the standard develops there are many competing systems that must be supported to reach a wide audience, so vreticle is designed to work seamlessly with the [webvr-boilerplate](https://github.com/borismus/webvr-boilerplate) which supports desktop browsers, google cardboard, pure mobile accelerometers, and oculus rift (via firefox and chromium experimental builds).
+* * *
+
+How To
+======
+
 Include vreticle
 
 ```html
