@@ -84,6 +84,20 @@ var material = new THREE.MeshNormalMaterial();
 var cube = new THREE.Mesh(geometry, material);
 reticle.add_collider(cube);
 
+cube.ongazelong = function(){
+  this.material = reticle.get_random_hex_material();
+}
+
+cube.ongazeover = function(){
+  this.material = reticle.get_random_hex_material();
+}
+
+cube.ongazeout = function(){
+  this.material = reticle.default_material();
+}
+
+
+
 // Position cube mesh
 cube.position.z = -1;
 

@@ -8,10 +8,13 @@ vreticle.Reticle = function(camera) {
     new_reticle.default_material = function() {
         return new THREE.MeshNormalMaterial();
     }
+        new_reticle.get_random_hex_color = function(){
+            return '#'+Math.floor(Math.random()*16777215).toString(16);
+        },
 
     new_reticle.get_random_hex_material = function() {
         return new THREE.MeshBasicMaterial({
-            color: new_reticle.util.get_random_hex_color(),
+            color: this.get_random_hex_color(),
             transparent: true,
             opacity: 0.5
         });
@@ -63,18 +66,18 @@ vreticle.Reticle = function(camera) {
     new_reticle.expanded_node = null;
     new_reticle.colliders = [];
     new_reticle.init = function(camera) {
-        new_reticle.create_reticle(camera);
-        new_reticle.start_clock();
+        this.create_reticle(camera);
+        this.start_clock();
     }
 
     new_reticle.create_reticle = function(camera) {
-        new_reticle.camera = camera;
-        new_reticle.reticle_arm_object = new THREE.Object3D();
-        new_reticle.reticle_object = new_reticle.create_default_object(new THREE.Vector3(0, 0, -.5), true, .01, undefined, true);
-        new_reticle.reticle_object.material.transparent = true;
-        new_reticle.reticle_object.material.opacity = 0.5;
-        new_reticle.reticle_arm_object.add(new_reticle.reticle_object);
-        new_reticle.camera.add(new_reticle.reticle_arm_object);
+        this.camera = camera;
+        this.reticle_arm_object = new THREE.Object3D();
+        this.reticle_object = this.create_default_object(new THREE.Vector3(0, 0, -.5), true, .01, undefined, true);
+        this.reticle_object.material.transparent = true;
+        this.reticle_object.material.opacity = 0.5;
+        this.reticle_arm_object.add(this.reticle_object);
+        this.camera.add(this.reticle_arm_object);
     }
 
     new_reticle.get_reticle_position = function() {
@@ -91,55 +94,64 @@ vreticle.Reticle = function(camera) {
     new_reticle.detect_reticle_hit = function() {
         //hack, these values should be calculated
         var vector = new THREE.Vector3(-0.0012499999999999734, -0.0053859964093356805, 0.5);
-        vector.unproject(new_reticle.camera);
-        var ray = new THREE.Raycaster(new_reticle.camera.position, vector.sub(new_reticle.camera.position).normalize());
+        vector.unproject(this.camera);
+        var ray = new THREE.Raycaster(this.camera.position, vector.sub(this.camera.position).normalize());
 
-        var intersects = ray.intersectObjects(new_reticle.colliders);
+        var intersects = ray.intersectObjects(this.colliders);
         //if an object is hit
 
         if (intersects.length > 0) {
             //save the new hit object and time
-            new_reticle.reticle_hit_object = intersects[0].object;
-            new_reticle.reticle_hit_time = new_reticle.clock.getElapsedTime();
+            this.reticle_hit_object = intersects[0].object;
+            this.reticle_hit_time = this.clock.getElapsedTime();
             //is the hit object gazeable
-            if (new_reticle.reticle_hit_object.gazeable) {
-                new_reticle.reticle_object.material = new_reticle.get_random_hex_material();
+            if (this.reticle_hit_object.gazeable) {
+                this.reticle_object.material = this.get_random_hex_material();
                 //check if there's a gazing object
-                if (new_reticle.gazing_object != null) {
+                if (this.gazing_object != null) {
                     //if the gazing object is the same as the hit object: check to see if the elapsed time exceeds the hover duration
-                    if (new_reticle.gazing_object == new_reticle.reticle_hit_object) {
+                    if (this.gazing_object == this.reticle_hit_object) {
                         //if it does: trigger the click
-                        if (new_reticle.reticle_hit_time - new_reticle.gazing_time >= new_reticle.gazing_duration) {
-
-                            new_reticle.stop_video();
-                            new_reticle.gazing_object.on_click();
+                        if (this.reticle_hit_time - this.gazing_time >= this.gazing_duration) {
+                            if(this.gazing_object.ongazelong != undefined){
+                            this.gazing_object.ongazelong();
+                        }
                             //reset gazing time
-                            new_reticle.gazing_time = new_reticle.reticle_hit_time;
+                            this.gazing_time = this.reticle_hit_time;
                         }
                     } else {
                         //if there is but it doesn't match the hit object: save the new hit object and time
                         console.log("gaze out");
-                        new_reticle.gazing_object = new_reticle.reticle_hit_object;
-                        new_reticle.gazing_time = new_reticle.reticle_hit_time;
+                        this.gazing_object = this.reticle_hit_object;
+                        this.gazing_time = this.reticle_hit_time;
+                        if(this.gazing_object.ongazeout != undefined){
+                            this.gazing_object.ongazeout();
+                        }
                     }
 
                 } else {
                     //if there is not: save the time and object as gazing
                     console.log("gaze over");
-                    new_reticle.gazing_object = new_reticle.reticle_hit_object;
-                    new_reticle.gazing_time = new_reticle.reticle_hit_time;
+                    this.gazing_object = this.reticle_hit_object;
+                    this.gazing_time = this.reticle_hit_time;
+                    if(this.gazing_object.ongazeover != undefined){
+                        this.gazing_object.ongazeover();
+                    }
                 }
 
             }
         } else {
-            if (new_reticle.gazing_object != null) {
+            if (this.gazing_object != null) {
                 console.log("gaze out");
+                    if(this.gazing_object.ongazeout != undefined){
+                        this.gazing_object.ongazeout();
+                    }
                 //clear gazing and hit object and times
-                new_reticle.reticle_hit_object = null;
-                new_reticle.reticle_hit_time = null;
-                new_reticle.gazing_object = null;
-                new_reticle.gazing_time = null;
-                new_reticle.reticle_object.material = new_reticle.default_material();
+                this.reticle_hit_object = null;
+                this.reticle_hit_time = null;
+                this.gazing_object = null;
+                this.gazing_time = null;
+                this.reticle_object.material = this.default_material();
             }
         }
     }
@@ -153,19 +165,13 @@ vreticle.Reticle = function(camera) {
     }
 
     new_reticle.add_collider = function(three_object) {
-        if (three_object.on_click == undefined) {
-            three_object.on_click = function() {
-                console.log("clicked");
-            };
-        }
-        if (three_object.on_gaze == undefined) {
-            three_object.on_gaze = function() {};
-        }
-        new_reticle.colliders.push(three_object);
+        three_object.gazeable = true;
+        this.colliders.push(three_object);
     };
 
     new_reticle.remove_collider = function(three_object) {
-        new_reticle.remove_from_list(three_object, new_reticle.colliders);
+        three_object.gazeable = false;
+        this.remove_from_list(three_object, new_reticle.colliders);
     };
 
     new_reticle.detect_gaze = function() {
@@ -173,12 +179,12 @@ vreticle.Reticle = function(camera) {
     };
 
     new_reticle.reticle_loop = function() {
-        new_reticle.detect_reticle_hit();
-        new_reticle.detect_gaze();
+        this.detect_reticle_hit();
+        this.detect_gaze();
     }
 
     new_reticle.start_clock = function() {
-        new_reticle.clock = new THREE.Clock(true);
+        this.clock = new THREE.Clock(true);
     }
 
     //start the reticle
