@@ -1,4 +1,4 @@
-# vreticular
+# vreticle
 A gaze directed interface for THREE.js with an event handling system, live demo available here: http://neuman.github.io/vreticle/ . 
 
 Include vreticle
