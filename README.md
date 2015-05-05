@@ -1,5 +1,5 @@
 # vreticular
-A gaze directed interface for THREE.js with an event handling system.
+A gaze directed interface for THREE.js with an event handling system, live demo available here: http://neuman.github.io/vreticle/ . 
 
 Include vreticle
 
@@ -32,6 +32,7 @@ cube.ongazeout = function(){
 ```
 
 Lastly, add your THREE.js object to the reticle's collider list!
+
 ```javascript
 reticle.add_collider(cube);
 ```
