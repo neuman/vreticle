@@ -8,17 +8,17 @@ vreticle.Reticle = function(camera) {
     new_reticle.default_material = function() {
         return new THREE.MeshNormalMaterial();
     }
-        new_reticle.get_random_hex_color = function(){
-            return '#'+Math.floor(Math.random()*16777215).toString(16);
+    new_reticle.get_random_hex_color = function() {
+            return '#' + Math.floor(Math.random() * 16777215).toString(16);
         },
 
-    new_reticle.get_random_hex_material = function() {
-        return new THREE.MeshBasicMaterial({
-            color: this.get_random_hex_color(),
-            transparent: true,
-            opacity: 0.5
-        });
-    }
+        new_reticle.get_random_hex_material = function() {
+            return new THREE.MeshBasicMaterial({
+                color: this.get_random_hex_color(),
+                transparent: true,
+                opacity: 0.5
+            });
+        }
     new_reticle.create_web_material = function(url_in) {
         var new_texture = THREE.ImageUtils.loadTexture(url_in);
         new_texture.minFilter = THREE.NearestFilter
@@ -78,6 +78,33 @@ vreticle.Reticle = function(camera) {
         this.reticle_object.material.opacity = 0.5;
         this.reticle_arm_object.add(this.reticle_object);
         this.camera.add(this.reticle_arm_object);
+
+
+        new_reticle.reticle_text_sprite = new_reticle.makeTextSprite(" World! ", {
+            fontsize: 32,
+            fontface: "Georgia",
+            borderColor: {
+                r: 0,
+                g: 0,
+                b: 255,
+                a: 1.0
+            }
+        });
+
+
+        this.reticle_text_sprite.position.setZ(-.5).setY(-.15).setX(.25);
+    }
+
+    new_reticle.show_text_sprite = function() {
+        this.reticle_object.add(this.reticle_text_sprite);
+    }
+
+    new_reticle.show_text_sprite = function() {
+        this.reticle_object.add(this.reticle_text_sprite);
+    }
+
+    new_reticle.hide_text_sprite = function() {
+        this.reticle_object.remove(this.reticle_text_sprite);
     }
 
     new_reticle.get_reticle_position = function() {
@@ -113,9 +140,9 @@ vreticle.Reticle = function(camera) {
                     if (this.gazing_object == this.reticle_hit_object) {
                         //if it does: trigger the click
                         if (this.reticle_hit_time - this.gazing_time >= this.gazing_duration) {
-                            if(this.gazing_object.ongazelong != undefined){
-                            this.gazing_object.ongazelong();
-                        }
+                            if (this.gazing_object.ongazelong != undefined) {
+                                this.gazing_object.ongazelong();
+                            }
                             //reset gazing time
                             this.gazing_time = this.reticle_hit_time;
                         }
@@ -124,7 +151,7 @@ vreticle.Reticle = function(camera) {
                         console.log("gaze out");
                         this.gazing_object = this.reticle_hit_object;
                         this.gazing_time = this.reticle_hit_time;
-                        if(this.gazing_object.ongazeout != undefined){
+                        if (this.gazing_object.ongazeout != undefined) {
                             this.gazing_object.ongazeout();
                         }
                     }
@@ -134,7 +161,7 @@ vreticle.Reticle = function(camera) {
                     console.log("gaze over");
                     this.gazing_object = this.reticle_hit_object;
                     this.gazing_time = this.reticle_hit_time;
-                    if(this.gazing_object.ongazeover != undefined){
+                    if (this.gazing_object.ongazeover != undefined) {
                         this.gazing_object.ongazeover();
                     }
                 }
@@ -143,9 +170,9 @@ vreticle.Reticle = function(camera) {
         } else {
             if (this.gazing_object != null) {
                 console.log("gaze out");
-                    if(this.gazing_object.ongazeout != undefined){
-                        this.gazing_object.ongazeout();
-                    }
+                if (this.gazing_object.ongazeout != undefined) {
+                    this.gazing_object.ongazeout();
+                }
                 //clear gazing and hit object and times
                 this.reticle_hit_object = null;
                 this.reticle_hit_time = null;
@@ -186,6 +213,136 @@ vreticle.Reticle = function(camera) {
     new_reticle.start_clock = function() {
         this.clock = new THREE.Clock(true);
     }
+
+    new_reticle.makeTextSprite = function(message, parameters) {
+        var get_sprite_text_material = function(message) {
+            if (parameters === undefined) parameters = {};
+
+            var fontface = parameters.hasOwnProperty("fontface") ?
+                parameters["fontface"] : "Arial";
+
+            var fontsize = parameters.hasOwnProperty("fontsize") ?
+                parameters["fontsize"] : 18;
+
+            var borderThickness = parameters.hasOwnProperty("borderThickness") ?
+                parameters["borderThickness"] : 4;
+
+            var borderColor = parameters.hasOwnProperty("borderColor") ?
+                parameters["borderColor"] : {
+                    r: 0,
+                    g: 0,
+                    b: 0,
+                    a: 1.0
+                };
+
+            var backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+                parameters["backgroundColor"] : {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 1.0
+                };
+
+            var spriteAlignment = 1;
+
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            context.font = "Bold " + fontsize + "px " + fontface;
+
+            // get size data (height depends only on font size)
+            var metrics = context.measureText(message);
+            var textWidth = metrics.width;
+
+            // background color
+            context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," + backgroundColor.b + "," + backgroundColor.a + ")";
+            // border color
+            context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," + borderColor.b + "," + borderColor.a + ")";
+
+            context.lineWidth = borderThickness;
+            new_reticle.roundRect(context, borderThickness / 2, borderThickness / 2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+            // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+            // text color
+            context.fillStyle = "rgba(0, 0, 0, 1.0)";
+
+            context.fillText(message, borderThickness, fontsize + borderThickness);
+
+            // canvas contents will be used for a texture
+            var texture = new THREE.Texture(canvas)
+            texture.needsUpdate = true;
+
+            var spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                useScreenCoordinates: false,
+                alignment: spriteAlignment
+            });
+
+            return spriteMaterial;
+        }
+
+        var set_text = function(message) {
+            this.material = this.get_sprite_text_material(message);
+        }
+
+        var blitz_text = function(message) {
+            new_reticle.reticle_text_sprite.clear_blitz();
+            new_reticle.show_text_sprite();
+            new_reticle.reticle_text_sprite.tokenized_message = message.replace(/(<([^>]+)>)/ig, "").split(" ");
+
+
+            new_reticle.reticle_text_sprite.counter = 1;
+            new_reticle.reticle_text_sprite.myMethod = function() {
+                if (new_reticle.reticle_text_sprite.tokenized_message[new_reticle.reticle_text_sprite.counter] != undefined) {
+                    //new_sprite.position.set(55,105,55);
+                    new_reticle.reticle_text_sprite.set_text(new_reticle.reticle_text_sprite.tokenized_message[new_reticle.reticle_text_sprite.counter]);
+                    new_reticle.reticle_text_sprite.counter += 1;
+                } else {
+                    new_reticle.reticle_text_sprite.clear_blitz();
+                }
+            }
+
+            //this.myMethod();
+            new_reticle.reticle_text_sprite.refreshIntervalId = setInterval(new_reticle.reticle_text_sprite.myMethod, 100);
+        }
+
+        var clear_blitz = function() {
+            clearInterval(new_reticle.reticle_text_sprite.refreshIntervalId);
+            new_reticle.hide_text_sprite();
+        }
+
+        var sprite = new THREE.Sprite(get_sprite_text_material(message));
+        sprite.scale.set(1, .5, 1.0);
+
+        //prep sprite as refreshable
+        sprite.style_parameters = parameters;
+        sprite.get_sprite_text_material = get_sprite_text_material;
+        sprite.set_text = set_text;
+        sprite.blitz_text = blitz_text;
+        sprite.clear_blitz = clear_blitz;
+        //sprite.context = context;
+
+
+
+        return sprite;
+    }
+
+    // function for drawing rounded rectangles
+    new_reticle.roundRect = function(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+    }
+
 
     //start the reticle
     new_reticle.init(camera);
