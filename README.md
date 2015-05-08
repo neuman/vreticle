@@ -37,8 +37,14 @@ cube.ongazeout = function(){
 }
 ```
 
-Lastly, add your THREE.js object to the reticle's collider list!
+Add your THREE.js object to the reticle's collider list!
 
 ```javascript
 reticle.add_collider(cube);
+```
+
+And make sure to tick the reticle during your animation loop. 
+
+```javascript
+  reticle.reticle_loop();
 ```
