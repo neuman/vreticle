@@ -9,7 +9,7 @@ vreticle.Reticle = function(camera) {
         return new THREE.MeshNormalMaterial();
     }
     new_reticle.get_random_hex_color = function() {
-            return '#' + Math.floor(Math.random() * 16777215).toString(16);
+	    return '#'+('00000'+(Math.random()*(1<<24)|0).toString(16)).slice(-6);
         },
 
         new_reticle.get_random_hex_material = function() {
